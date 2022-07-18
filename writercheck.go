@@ -1,8 +1,8 @@
 package writercheck
 
 import (
-	"fmt"
 	"go/ast"
+	"go/types"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -19,7 +19,6 @@ var Analyzer = &analysis.Analyzer{
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
-	fmt.Println(pass.Analyzer)
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
 	nodeFilter := []ast.Node{
@@ -33,5 +32,21 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 		}
 	})
+
+	for _, f := range pass.Files {
+		for _, decl := range f.Decls {
+			if decl, ok := decl.(*ast.FuncDecl); ok && decl.Name.Name == name {
+				if obj, ok := pass.TypesInfo.Defs[decl.Name].(*types.Func); ok {
+					pass.ExportObjectFact(obj, new(foundFact))
+				}
+			}
+		}
+
+	}
 	return nil, nil
 }
+
+type foundFact struct{}
+
+func (*foundFact) String() string { return "found" }
+func (*foundFact) AFact()         {}
