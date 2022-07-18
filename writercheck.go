@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-var Analyzer = &Analyzer{
+var Analyzer = &analysis.Analyzer{
 	Name: "writercheck",
 	Doc:  "check for implementation writer interface",
 	Run:  run,
