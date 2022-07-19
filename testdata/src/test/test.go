@@ -1,13 +1,17 @@
 package test
 
-type F struct{}
+type F struct{} // OK
 
-func (f F) Write(s string) (n int, err error) { // want "ng"
+func (f F) Write(s string) (n int, err error) {
 	return n, err
 }
 
-type FF struct{}
+func (f F) String() string {
+	return "test"
+}
 
-func (f FF) Write(p []byte) (n int, err error) { // OK
+type FF struct{} // OK
+
+func (f FF) Write(p []byte) (n int, err error) {
 	return n, err
 }

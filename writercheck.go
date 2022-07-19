@@ -7,7 +7,6 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
-	"golang.org/x/tools/go/ast/inspector"
 )
 
 var Analyzer = &analysis.Analyzer{
@@ -20,26 +19,47 @@ var Analyzer = &analysis.Analyzer{
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
-	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	/*
+		inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	nodeFilter := []ast.Node{
-		(*ast.Ident)(nil),
-	}
-	inspect.Preorder(nodeFilter, func(n ast.Node) {
-		switch n := n.(type) {
-		case *ast.Ident:
-			if n.Name == "Gopher" {
-				pass.Reportf(n.Pos(), "name of identifier must not be 'Gopher'")
-			}
+		nodeFilter := []ast.Node{
+			(*ast.Ident)(nil),
 		}
-	})
+		//ast.Print(nil, pass.Files)
+		//fmt.Println("types", pass.TypesInfo)
+			inspect.Preorder(nodeFilter, func(n ast.Node) {
+				switch n := n.(type) {
+				case *ast.Ident:
+					if n.Name == "Gopher" {
+						pass.Reportf(n.Pos(), "name of identifier must not be 'Gopher'")
+					}
+				}
+			})
+	*/
 
+	fmt.Println(types.Universe.Names())
 	for expr, typ := range pass.TypesInfo.Types {
-		switch expr.(type) {
+		//ast.Print(nil, expr)
+		//ast.Print(nil, typ.Type)
+		switch e := expr.(type) {
 		case *ast.BinaryExpr:
-			obj := types.Universe.Lookup("string").Type().(*types.Interface)
-			if types.Implements(typ.Type, obj) {
+			obj := types.Universe.Lookup("string").Type()
+			if types.Implements(typ.Type, obj.(*types.Interface)) {
 				fmt.Println(typ.Value, "implements error")
+			}
+		case *ast.StructType:
+			fmt.Println("str", expr.Pos(), e)
+		case *ast.FuncType:
+			fmt.Println("func", expr.Pos(), e)
+
+		case *ast.FuncLit:
+			fmt.Println("if", expr.Pos(), e)
+		default:
+			//fmt.Println(expr.Pos(), e)
+			obj := types.Universe.Lookup("error").Type().Underlying()
+			if !types.Implements(typ.Type, obj.(*types.Interface)) {
+				//fmt.Println(typ.Type, "implements error")
+				pass.Reportf(expr.Pos(), "must implement stringer")
 			}
 		}
 	}
