@@ -1,6 +1,7 @@
 package writercheck
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 
@@ -13,7 +14,7 @@ var Analyzer = &analysis.Analyzer{
 	Name: "writercheck",
 	Doc:  "check for implementation writer interface",
 	Run:  run,
-	Requiers: []*analysis.Analyzer{
+	Requires: []*analysis.Analyzer{
 		inspect.Analyzer,
 	},
 }
@@ -33,16 +34,32 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		}
 	})
 
-	for _, f := range pass.Files {
-		for _, decl := range f.Decls {
-			if decl, ok := decl.(*ast.FuncDecl); ok && decl.Name.Name == name {
-				if obj, ok := pass.TypesInfo.Defs[decl.Name].(*types.Func); ok {
-					pass.ExportObjectFact(obj, new(foundFact))
+	for expr, typ := range pass.TypesInfo.Types {
+		switch expr.(type) {
+		case *ast.BinaryExpr:
+			obj := types.Universe.Lookup("string").Type().(*types.Interface)
+			if types.Implements(typ.Type, obj) {
+				fmt.Println(typ.Value, "implements error")
+			}
+		}
+	}
+
+	/*
+		for _, f := range pass.Files {
+			for _, decl := range f.Decls {
+				if decl, ok := decl.(*ast.StructType); ok {
+					ast.Print(nil, decl.Fields.List)
+					for _, p := range decl.Fields.List {
+						obj := types.Universe.Lookup("string").Type().(*types.Interface)
+						if types.Implements(p.Type, obj) {
+							fmt.Println(f, "implements error")
+						}
+					}
 				}
 			}
 		}
+	*/
 
-	}
 	return nil, nil
 }
 
