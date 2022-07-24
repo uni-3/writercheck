@@ -1,17 +1,23 @@
 package test
 
-type F struct{} // OK
+type F struct{}
 
-func (f F) Write(s string) (n int, err error) {
+func (f F) Write(p []byte) (n int, err error) { // OK
 	return n, err
 }
 
-func (f F) String() string {
-	return "test"
+func Write(p []byte) (n int, err error) { // OK
+	return n, err
 }
 
-type FF struct{} // OK
+type FF struct{}
 
-func (f FF) Write(p []byte) (n int, err error) {
+func (f FF) Write(s string, p int) (n int, err error) { // Write arg length be must 1
+	return n, err
+}
+
+type FFF struct{}
+
+func (f FFF) Write(p []int) (n int, err error) { // Write arg length be must 1
 	return n, err
 }
