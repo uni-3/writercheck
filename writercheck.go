@@ -1,7 +1,6 @@
 package writercheck
 
 import (
-	"fmt"
 	"go/ast"
 	"go/types"
 
@@ -62,7 +61,39 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				}
 
 				// 返り値
-				fmt.Println("types numfields", n.Type.TypeParams.NumFields())
+				results := n.Type.Results
+				if results.NumFields() != 2 {
+					pass.Reportf(n.Pos(), "%s arg length '%d' must be 1", n.Name.Name, results.NumFields())
+					return
+				}
+
+				resInt := results.List[0]
+				// 1つめ
+				if resInt.Names[0].Name != "n" {
+					pass.Reportf(n.Pos(), "%s's an argument name is '%s' must be 'n'", n.Name.Name, resInt.Names[0].Name)
+				}
+				switch typ := resInt.Type.(type) {
+				case *ast.Ident:
+					if typ.Name != "int" {
+						pass.Reportf(n.Pos(), "%s arg is invalid type '%s' must be 'int'", resInt.Names[0].Name, typ.Name)
+					}
+				default:
+					pass.Reportf(n.Pos(), "%s arg is invalid", resInt.Names[1].Name)
+				}
+
+				resErr := results.List[1]
+				// 2つめ
+				if resErr.Names[0].Name != "err" {
+					pass.Reportf(n.Pos(), "%s's an argument name is '%s' must be 'p'", n.Name.Name, resErr.Names[0].Name)
+				}
+				switch typ := resErr.Type.(type) {
+				case *ast.Ident:
+					if typ.Name != "error" {
+						pass.Reportf(n.Pos(), "%s arg is invalid type '%s' must be 'byte'", resErr.Names[0].Name, typ.Name)
+					}
+				default:
+					pass.Reportf(n.Pos(), "%s arg is invalid", resErr.Names[0].Name)
+				}
 			}
 		}
 	})
