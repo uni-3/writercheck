@@ -1,9 +1,9 @@
 package test
 
 // OK
-type F struct{}
+type correct struct{}
 
-func (f F) Write(p []byte) (n int, err error) { // OK
+func (f correct) Write(p []byte) (n int, err error) { // OK
 	return n, err
 }
 
@@ -11,34 +11,41 @@ func Write(p []byte) (n int, err error) { // OK
 	return n, err
 }
 
-// 引数
-type FF struct{}
+// test pattern invalid arguments
+type incorrectWithArgLength struct{}
 
-func (f FF) Write(s string, p int) (n int, err error) { // Write arg length be must 1
+func (f incorrectWithArgLength) Write(s string, p int) (n int, err error) { // want "Write's argument length is '2' must be 1"
 	return n, err
 }
 
-type FFF struct{}
+type incorrectWithFirstArgType struct{}
 
-func (f FFF) Write(p []int) (n int, err error) { // Write arg length be must 1
+func (f incorrectWithFirstArgType) Write(p []int) (n int, err error) { // want "p argument is invalid type 'int' must be 'byte'"
 	return n, err
 }
 
-// 返り値
+type incorrectWithFirstArgName struct{}
+
+func (f incorrectWithFirstArgName) Write(pp []byte) (n int, err error) { // want "Write's argument name is 'pp' must be 'p'"
+	return n, err
+}
+
+// test pattern invalid return values
+type incorrectWithResLength struct{}
 type FFFF struct{}
 
-func (f FFFF) Write(p []byte) (err error) { // Write arg length be must 1
+func (f incorrectWithResLength) Write(p []byte) (err error) { // want "Write returns length '1' must be 2"
 	return err
 }
 
-type FFFFF struct{}
+type incorrectWithFirstResType struct{}
 
-func (f FFFFF) Write(p []byte) (n string, err error) { // Write arg length be must 1
+func (f incorrectWithFirstResType) Write(p []byte) (n string, err error) { // want "Write first return type is 'string' must be 'int'"
 	return n, err
 }
 
-type FFFFFF struct{}
+type incorrectWithFirstResName struct{}
 
-func (f FFFFFF) Write(p []byte) (num int, err error) { // Write arg length be must 1
+func (f incorrectWithFirstResName) Write(p []byte) (num int, err error) { // want "Write first return name is 'num' must be 'n'"
 	return num, err
 }
