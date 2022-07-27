@@ -18,15 +18,11 @@ var Analyzer = &analysis.Analyzer{
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
-	// 普通に愚直にinterface満たすか確認していく
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
 	nodeFilter := []ast.Node{
-		//(*ast.Ident)(nil),
 		(*ast.FuncDecl)(nil),
 	}
-	//ast.Print(nil, pass.Files)
-	//fmt.Println("types", pass.TypesInfo)
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
 		fn := n.(*ast.FuncDecl)
 		fname := fn.Name.Name
@@ -50,11 +46,11 @@ func run(pass *analysis.Pass) (interface{}, error) {
 							return
 						}
 					default:
-						pass.Reportf(fn.Pos(), "%s arg is invalid", fi.Names[0].Name)
+						pass.Reportf(fn.Pos(), "%s argument is invalid", fi.Names[0].Name)
 						return
 					}
 				default:
-					pass.Reportf(fn.Pos(), "%s arg is invalid", fi.Names[0].Name)
+					pass.Reportf(fn.Pos(), "%s argument is invalid", fi.Names[0].Name)
 					return
 				}
 			}
