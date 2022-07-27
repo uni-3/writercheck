@@ -1,0 +1,20 @@
+name: deploy st ndb
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "./**.go"
+      - ".github/workflows/go-test.yaml"
+jobs:
+  gotest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup go
+        uses: actions/setup-go@v2
+          with:
+            go-version: 1.18
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: go test
+        run: go test -v ./...
